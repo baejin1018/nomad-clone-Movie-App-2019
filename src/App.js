@@ -1,5 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
 class App extends React.Component {
   state = {
@@ -25,18 +28,51 @@ class App extends React.Component {
   // componentDidUpdate(){
   //   console.log("I hust updated");
   // }
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.nomadcoders1.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
   componentDidMount() {
     // 컴포넌트가 마운트된 직후 호출
-    setTimeout(() => {
-      //6초뒤에 isLoading을 false로 변경
-      this.setState({ isLoading: false });
-    }, 6000);
+    this.getMovies();
+    // setTimeout(() => {
+    //   //6초뒤에 isLoading을 false로 변경
+    //   this.setState({ isLoading: false });
+    // }, 6000);
   }
 
   render() {
-    const { isLoading } = this.state;
-    return <div>{isLoading ? "Loading..." : "We are ready"}</div>; //isLoading이 ture면 Loading false면 We are ready 출력
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="contaoner">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loder_text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    ); //isLoading이 ture면 Loading false면 We are ready 출력
 
     // <div>
     //   <h1>The number is : {this.state.count}</h1>
